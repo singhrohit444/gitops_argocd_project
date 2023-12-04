@@ -4,7 +4,7 @@ pipeline{
 
     environment{
 
-        DOCKERHUB_USERNAME = "singhrohit444@gmail.com"
+        DOCKERHUB_USERNAME = "singhrohit444"
         APP_NAME = "gitops-argo-app"
         IMAGE_TAG = "${BUILD_NUMBER}"
         IMAGE_NAME = "${DOCKERHUB_USERNAME}" + "/" + "${APP_NAME}"
@@ -24,8 +24,25 @@ pipeline{
             steps{
                 script{
                     git credentialsId: 'github',
-                    url: 'https://github.com/singhrohit444/gitops-argocd-project.git',
+                    url: 'https://github.com/singhrohit444/gitops_argocd_project.git',
                     branch: 'main'
+                }
+            }
+        }
+        stage('Build Docker Image'){
+            steps{
+                script{
+                    docker_image = docker.build "${IMAGE_NAME}"
+                }
+            }
+        }
+        stage('Push docker image'){
+            steps{
+                script{
+                    docker.withRegistry('',REGISTRY_CREDS){
+                        docker_image.Push("$BUILD_NUMBER")
+                        docker_image.Push('latest')
+                    }
                 }
             }
         }
