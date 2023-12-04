@@ -46,5 +46,24 @@ pipeline{
                 }
             }
         }
+        stage('Delete docker images from jenkins server'){
+            steps{
+                script{
+                    sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker rmi ${IMAGE_NAME}:latest"
+                }
+            }
+        }
+        stage('Update K8s Deployment file'){
+            steps{
+                script{
+                    sh """
+                    cat deployment.yaml
+                    sed -i 's/${APP_NAME}.*/${APP_NAME}.${IMAGE_TAG}/g' deployment.yaml
+                    cat deployment.yaml
+                    """
+                }
+            }
+        }
     }
 }
