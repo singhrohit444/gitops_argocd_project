@@ -58,10 +58,27 @@ pipeline{
             steps{
                 script{
                     sh """
-                    cat deployment.yaml
-                    sed -i 's/${APP_NAME}.*/${APP_NAME}.${IMAGE_TAG}/g' deployment.yaml
-                    cat deployment.yaml
+                    cat Deployment.yaml
+                    sed -i 's/${APP_NAME}.*/${APP_NAME}:${IMAGE_TAG}/g' Deployment.yaml
+                    cat Deployment.yaml
                     """
+                }
+            }
+        }
+        stage('Push changes to github'){
+            steps{
+                script{
+                    sh """
+                    git config --global user.name "singhrohit444"
+                    git config --global user.email "singhrohit444@gmail.com"
+                    git add Deployment.yaml
+                    git commit -m "uploading updated deployment k8s manifest file to github"
+                    """
+
+                    withCredentials([gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')]) {
+                    
+                    sh "git push https://github.com/singhrohit444/gitops_argocd_project.git main"
+                    }
                 }
             }
         }
